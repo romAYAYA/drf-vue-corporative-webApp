@@ -1,20 +1,21 @@
 <template>
   <div>
-    {{ products }}sdf
+    <button @click="register">click</button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
 import axios from 'axios'
 
-const products = ref([])
 
-
-const getData = async () => {
-  const { data } = await axios.get('https://fakestoreapi.com/products')
-  products.value = data
+const register = async () => {
+  await axios.post('http://127.0.0.1:8000/api/register', {
+    username: 'test3325322',
+    email: 'test223332@te2st.com',
+    password: 'Tes3dfghsdfg2t1234!Tes'
+  })
 }
-getData()
+
+
 </script>
 
