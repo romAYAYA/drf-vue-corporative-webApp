@@ -6,9 +6,15 @@
     <main>
       <RouterView/>
     </main>
+    <Toast/>
   </div>
 </template>
 
 <script setup lang="ts">
 import HeaderComponent from './components/base/HeaderComponent.vue'
+import { useUserStore } from './stores/user.ts'
+
+const userStore = useUserStore()
+
+userStore.getUser()
 </script>

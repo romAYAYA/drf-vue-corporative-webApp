@@ -9,16 +9,24 @@
     </template>
 
     <template #end>
-      <div class="flex align-items-center gap-2">
+      <div v-if="userStore.isUserLoaded" class="flex align-items-center gap-2">
         <Button label="Изменить профиль" severity="secondary" size="small" text/>
         <Avatar image="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png"
                 style="width: 32px; height: 32px"/>
+      </div>
+      <div v-else>
+        <ModalComponent/>
       </div>
     </template>
   </Toolbar>
 </template>
 
 <script setup lang="ts">
+import { useUserStore } from '../../stores/user.ts'
+import ModalComponent from '../authModal/ModalComponent.vue'
+
+const userStore = useUserStore()
+
 const navLinks = [
   { label: 'Главная', url: '/' },
   { label: 'О нас', url: '/about' }
