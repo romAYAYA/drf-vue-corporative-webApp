@@ -3,6 +3,7 @@ import PrimeVue from 'primevue/config'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
 import { createPinia } from 'pinia'
+import { VueQueryPlugin } from '@tanstack/vue-query'
 
 import App from './App.vue'
 import './style.css'
@@ -20,6 +21,8 @@ import Dialog from 'primevue/dialog'
 import TabView from 'primevue/tabview'
 import TabPanel from 'primevue/tabpanel'
 import Toolbar from 'primevue/toolbar'
+import Textarea from 'primevue/textarea'
+import FileUpload from 'primevue/fileupload'
 
 
 const app = createApp(App)
@@ -36,6 +39,8 @@ app.component('Dialog', Dialog)
 app.component('TabView', TabView)
 app.component('TabPanel', TabPanel)
 app.component('Toolbar', Toolbar)
+app.component('Textarea', Textarea)
+app.component('FileUpload', FileUpload)
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL
 
@@ -58,12 +63,17 @@ axios.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config
+    if (originalRequest.url.includes('/token/refresh')) {
+      return Promise.reject(error)
+    }
+
     if (error.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
       try {
         const response = await axios.post('/token/refresh', {
           refresh: Cookies.get('refresh_token')
         })
+
         const newAccessToken = response.data.access
         const newRefreshToken = response.data.refresh
 
@@ -71,11 +81,15 @@ axios.interceptors.response.use(
         Cookies.set('refresh_token', newRefreshToken, { path: '/' })
 
         originalRequest.headers.Authorization = `Bearer ${ newAccessToken }`
+
         return axios(originalRequest)
       } catch (refreshError) {
+        Cookies.remove('access_token', { path: '/' })
+        Cookies.remove('refresh_token', { path: '/' })
         return Promise.reject(refreshError)
       }
     }
+
     return Promise.reject(error)
   }
 )
@@ -83,6 +97,7 @@ axios.interceptors.response.use(
 app.use(PrimeVue, { ripple: true, unstyled: true, pt: Lara })
 app.use(router)
 app.use(VueAxios, axios)
+app.use(VueQueryPlugin)
 app.use(pinia)
 app.use(ToastService)
 app.mount('#app')

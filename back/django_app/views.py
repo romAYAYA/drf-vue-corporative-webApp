@@ -10,7 +10,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
 
 from django_app import models, serializers
-from django_app.serializers import ProfileSerializer
 from django_app.utils import password_check, get_client_ip
 
 
@@ -89,20 +88,24 @@ def user_login(request: Request) -> Response:
     )
 
 
-@api_view(["PUT"])
+@api_view(["GET", "PUT"])
 @permission_classes([IsAuthenticated])
-def update_profile(request: Request) -> Response:
-    user = request.user
+def update_user(request):
     try:
-        profile = models.Profile.objects.get(user=user)
-    except models.Profile.DoesNotExist:
-        return Response({"error": "Profile not found"}, status=404)
+        user = request.user
+    except User.DoesNotExist:
+        return Response(status=404)
 
-    serializer = ProfileSerializer(profile, data=request.data, partial=True)
-    if serializer.is_valid():
-        serializer.save()
+    if request.method == "GET":
+        serializer = serializers.UserSerializer(user)
         return Response(serializer.data)
-    return Response(serializer.errors, status=400)
+
+    elif request.method == "PUT":
+        serializer = serializers.UserSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
 
 
 @api_view(["GET"])
