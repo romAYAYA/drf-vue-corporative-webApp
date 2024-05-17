@@ -19,7 +19,7 @@ const toast = useToast()
 const userData = ref<User>({ username: '', password: '' })
 
 const loginUser = (userData: User) => {
-  if (userData.username.length >= 3 && userData.password.length >= 3) {
+  if (userData.username.length >= 3 && userData.password && userData.password.length >= 3) {
     userStore.loginUser(userData)
   } else {
     toast.add({

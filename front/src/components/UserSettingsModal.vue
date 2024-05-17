@@ -70,7 +70,7 @@ const { mutate: changeUserData, status: changeUserDataStatus } = useMutation({
   mutationKey: ['userInfoChange'],
   mutationFn: async () => {
     const formData = new FormData()
-    if (userData.value) {
+    if (userData.value && userData.value.profile) {
       formData.append('username', userData.value.username)
       formData.append('profile.bio', userData.value.profile.bio)
     }
