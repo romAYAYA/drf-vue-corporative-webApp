@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Profile
+from .models import Profile, Project
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -30,3 +30,11 @@ class UserSerializer(serializers.ModelSerializer):
         profile_serializer.update(profile_instance, profile_data)
 
         return instance
+
+
+class ProjectSerializer(serializers.ModelSerializer):
+    author = UserSerializer()
+
+    class Meta:
+        model = Project
+        fields = ["id", "name", "description", "creation_date", "author", "file"]

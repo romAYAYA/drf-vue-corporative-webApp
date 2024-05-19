@@ -10,7 +10,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
 
 from django_app import models, serializers
-from django_app.utils import password_check, get_client_ip
+from django_app.utils import password_check, get_client_ip, update_rating, rate_item
 
 
 @api_view(["POST"])
@@ -123,3 +123,82 @@ def get_users(request: Request) -> Response:
     users = User.objects.all()
     serialized_users = serializers.UserSerializer(instance=users, many=True).data
     return Response(serialized_users)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def create_project(request: Request) -> Response:
+    serializer = serializers.ProjectSerializer(data=request.data)
+    if serializer.is_valid():
+        project = serializer.save(author=request.user)
+        return Response(serializers.ProjectSerializer(project).data, status=201)
+    return Response(serializer.errors, status=400)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_all_projects(request: Request) -> Response:
+    projects = models.Project.objects.all()
+    serializer = serializers.ProjectSerializer(projects, many=True)
+    return Response(serializer.data, status=200)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_project_by_id(request: Request, project_id: int) -> Response:
+    try:
+        project = models.Project.objects.get(id=project_id)
+    except models.Project.DoesNotExist:
+        return Response({"detail": "Project not found."}, status=404)
+
+    serializer = serializers.ProjectSerializer(project)
+    return Response(serializer.data, status=200)
+
+
+@api_view(["PUT", "PATCH"])
+@permission_classes([IsAuthenticated])
+def edit_project(request: Request, project_id: int) -> Response:
+    try:
+        project = models.Project.objects.get(id=project_id, author=request.user)
+    except models.Project.DoesNotExist:
+        return Response(
+            {
+                "detail": "Project not found or you do not have permission to edit this project."
+            },
+            status=404,
+        )
+
+    serializer = serializers.ProjectSerializer(project, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=200)
+    return Response(serializer.errors, status=400)
+
+
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
+def delete_project(request: Request, project_id: int) -> Response:
+    try:
+        project = models.Project.objects.get(id=project_id, author=request.user)
+    except models.Project.DoesNotExist:
+        return Response(
+            {
+                "detail": "Project not found or you do not have permission to delete this project."
+            },
+            status=404,
+        )
+
+    project.delete()
+    return Response({"detail": "Project deleted successfully."}, status=204)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def rate_project(request, project_id):
+    return rate_item(request, project_id, models.Project, models.ProjectRating)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def rate_comment(request, comment_id):
+    return rate_item(request, comment_id, models.Comment, models.CommentRating)
