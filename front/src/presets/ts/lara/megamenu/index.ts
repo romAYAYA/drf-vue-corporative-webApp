@@ -20,7 +20,7 @@ export default {
       },
     ],
   }),
-  menu: ({ props }) => ({
+  menu: () => ({
     class: [
       // Flexbox
       "sm:flex",

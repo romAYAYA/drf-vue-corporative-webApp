@@ -15,6 +15,7 @@ export default {
     ],
   },
   moveupbutton: {
+//@ts-ignore
     root: ({ context }) => ({
       class: [
         // Flexbox & Alignment
@@ -57,6 +58,8 @@ export default {
     },
   },
   movedownbutton: {
+//@ts-ignore
+
     root: ({ context }) => ({
       class: [
         // Flexbox & Alignment
@@ -99,6 +102,8 @@ export default {
     },
   },
   movetopbutton: {
+//@ts-ignore
+
     root: ({ context }) => ({
       class: [
         // Flexbox & Alignment
@@ -141,6 +146,8 @@ export default {
     },
   },
   movebottombutton: {
+//@ts-ignore
+
     root: ({ context }) => ({
       class: [
         // Flexbox & Alignment
@@ -227,6 +234,8 @@ export default {
       "overflow-auto",
     ],
   },
+//@ts-ignore
+
   item: ({ context }) => ({
     class: [
       // Position

@@ -28,6 +28,8 @@ export default {
         "hover:bg-primary-600 hover:border-primary-600 dark:hover:bg-primary-300 dark:hover:border-primary-300":
           props.modelValue,
         "outline-none outline-offset-0 ring ring-primary-400/50 dark:ring-primary-300/50":
+//@ts-ignore
+
           context.focused && !props.disabled,
       },
 

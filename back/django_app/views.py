@@ -1,6 +1,7 @@
 import datetime
 
 from django.contrib.auth.models import User
+from django.shortcuts import render
 from rest_framework.decorators import permission_classes, api_view
 from django.contrib.auth import authenticate
 from rest_framework.request import Request

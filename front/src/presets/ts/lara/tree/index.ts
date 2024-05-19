@@ -94,9 +94,11 @@ export default {
       "cursor-pointer select-none",
     ],
   }),
+//@ts-ignore
   checkboxContainer: {
     class: "mr-2",
   },
+//@ts-ignore
   checkbox: ({ context }) => ({
     class: [
       "relative",

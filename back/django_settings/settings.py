@@ -7,6 +7,8 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+FRONTEND_DIR = BASE_DIR.parent / "front"
+print(FRONTEND_DIR)
 SECRET_KEY = os.environ.get("SECRET_KEY")
 DEBUG = os.environ.get("DEBUG")
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
@@ -46,7 +48,7 @@ ROOT_URLCONF = "django_settings.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [FRONTEND_DIR / "dist"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -89,15 +91,15 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = 'Asia/Karachi'
 
 USE_I18N = True
 
 USE_TZ = True
 
-STATIC_URL = "/static/"
+STATIC_URL = "assets/" if DEBUG else "/static/"
 STATIC_ROOT = Path(BASE_DIR / "staticroot")
-STATICFILES_DIRS = [Path(BASE_DIR / "static")]
+STATICFILES_DIRS = [Path(BASE_DIR / "static"), Path(FRONTEND_DIR / "dist/assets/")]
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = Path(BASE_DIR / "static/media")

@@ -4,6 +4,7 @@ export default {
   root: {
     class: ["cursor-pointer inline-flex relative select-none align-bottom", "w-6 h-6"],
   },
+//@ts-ignore
   checkbox: ({ props, context }) => ({
     class: [
       "relative",

@@ -1,9 +1,8 @@
 import {
   InputNumberPassThroughMethodOptions,
   InputNumberPassThroughOptions,
-  InputNumberSharedPassThroughMethodOptions,
 } from "primevue/inputnumber";
-import { InputTextPassThroughMethodOptions, InputTextPassThroughOptions } from "primevue/inputtext";
+import { InputTextPassThroughMethodOptions } from "primevue/inputtext";
 import { ButtonPassThroughMethodOptions } from "primevue/button";
 
 export default {
@@ -70,7 +69,7 @@ export default {
       ],
     }),
   },
-  buttonGroup: ({ props }) => ({
+  buttonGroup: () => ({
     class: [
       // Flex
       "flex",

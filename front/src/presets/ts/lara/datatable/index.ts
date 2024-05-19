@@ -2,7 +2,6 @@ import { DataTablePassThroughOptions } from "primevue/datatable";
 import {
   ColumnPassThroughMethodOptions,
   ColumnPassThroughOptionType,
-  ColumnSharedPassThroughMethodOptions,
   ColumnState,
 } from "primevue/column";
 import { DropdownPassThroughMethodOptions } from "primevue/dropdown";

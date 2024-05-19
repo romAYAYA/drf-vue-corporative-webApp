@@ -147,6 +147,8 @@ export default {
       "border-surface-300 dark:border-surface-700",
     ],
   },
+//@ts-ignore
+
   headerCheckboxContainer: {
     class: [
       "relative",
@@ -235,6 +237,7 @@ export default {
   list: {
     class: "py-3 list-none m-0",
   },
+//@ts-ignore
   item: ({ context }) => ({
     class: [
       // Font
@@ -307,6 +310,7 @@ export default {
       "select-none",
     ],
   },
+//@ts-ignore
   checkbox: ({ context }) => ({
     class: [
       // Alignment
