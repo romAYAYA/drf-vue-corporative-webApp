@@ -30,6 +30,7 @@ const userStore = useUserStore()
 
 const navLinks = [
   { label: 'Главная', url: '/' },
+  { label: 'Проекты', url: '/projects' },
   { label: 'О нас', url: '/about' }
 ]
 </script>
