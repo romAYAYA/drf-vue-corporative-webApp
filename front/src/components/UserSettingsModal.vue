@@ -23,6 +23,7 @@
         />
 
         <Button class="w-full" @click="changeUserData()">Сохранить</Button>
+        <Button class="w-full" severity="danger" @click="logoutUser()">Выйти</Button>
       </div>
     </Dialog>
   </div>
@@ -36,7 +37,10 @@ import { useMutation } from '@tanstack/vue-query'
 import { useToast } from 'primevue/usetoast'
 import { User } from '../types/user.interface.ts'
 import { errorDetail, errorSummary } from '../utils/constants.ts'
+import Cookies from 'js-cookie'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const toast = useToast()
 const userStore = useUserStore()
 
@@ -88,6 +92,20 @@ const { mutate: changeUserData, status: changeUserDataStatus } = useMutation({
   }
 })
 
+const { mutate: logoutUser } = useMutation({
+  mutationKey: ['logoutUser'],
+  mutationFn: async () => {
+    const res = await axios.post('/users/logout')
+    if (res.status === 205) {
+      Cookies.remove('refresh_token')
+      Cookies.remove('access_token')
+      userStore.user = {}
+      visible.value = false
+      await router.push('/')
+    }
+  }
+})
+
 watch(changeUserDataStatus, async (newVal) => {
   if (newVal === 'error') {
     toast.add({
@@ -104,6 +122,7 @@ watch(changeUserDataStatus, async (newVal) => {
       life: 3000
     })
     await userStore.getUser()
+    visible.value = false
   }
 })
 

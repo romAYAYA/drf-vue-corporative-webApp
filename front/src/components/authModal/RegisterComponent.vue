@@ -14,6 +14,8 @@ import { ref } from 'vue'
 import { User } from '../../types/user.interface.ts'
 import { useToast } from 'primevue/usetoast'
 
+const visible = defineModel('visible')
+
 const userStore = useUserStore()
 const toast = useToast()
 
@@ -22,6 +24,7 @@ const userData = ref<User>({ username: '', email: '', password: '' })
 const registerUser = (userData: User) => {
   if (userData.username.length >= 3 && userData.email && userData.email.length >= 3 && userData.password && userData.password.length >= 3) {
     userStore.registerUser(userData)
+    visible.value = false
   } else {
     toast.add({
       severity: 'error',

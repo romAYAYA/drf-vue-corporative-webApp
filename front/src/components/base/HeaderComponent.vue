@@ -2,17 +2,18 @@
   <Toolbar style="border-radius: 3rem; padding: 1rem 1rem 1rem 1.5rem">
     <template #start>
       <div v-for="link in navLinks" :key="link.url" class="flex align-items-center gap-2">
-        <RouterLink activeClass="text-[--button-dark] border-b-2 border-[--button-dark]" class="ml-3" :to="link.url">
+        <RouterLink :class="getActiveLink(link.url)" activeClass="text-[--button-dark] border-b-2 border-[--button-dark]" class="ml-3" :to="link.url">
           {{ link.label }}
         </RouterLink>
       </div>
     </template>
 
     <template #end>
-      <div v-if="userStore.isUserLoaded" class="flex align-items-center gap-2">
+      <div v-if="isUserLoaded" class="flex align-items-center gap-2">
         <UserSettingsModal/>
-        <Avatar image="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png"
-                style="width: 32px; height: 32px"/>
+        <img v-if="userStore.user && userStore.user.profile" class="rounded-full overflow-hidden h-12 w-12"
+             :src="`http://localhost:8000/${userStore.user.profile.avatar}`"
+             alt="avatar"/>
       </div>
       <div v-else>
         <ModalComponent/>
@@ -25,8 +26,22 @@
 import { useUserStore } from '../../stores/user.ts'
 import ModalComponent from '../authModal/ModalComponent.vue'
 import UserSettingsModal from '../UserSettingsModal.vue'
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 
 const userStore = useUserStore()
+
+const route = useRoute()
+
+const isUserLoaded = computed(()=> userStore.isUserLoaded)
+
+const getActiveLink = (url: string) => {
+  if (route.path === url) {
+    return 'text-[--button-dark] border-b-2 border-[--button-dark]'
+  } else {
+    return ''
+  }
+}
 
 const navLinks = [
   { label: 'Главная', url: '/' },

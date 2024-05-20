@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Profile, Project
+from .models import Profile, Project, Comment
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -34,7 +34,40 @@ class UserSerializer(serializers.ModelSerializer):
 
 class ProjectSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
+    rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Project
-        fields = ["id", "name", "description", "creation_date", "author", "file"]
+        fields = [
+            "id",
+            "name",
+            "description",
+            "creation_date",
+            "author",
+            "file",
+            "rating",
+        ]
+
+    @staticmethod
+    def get_rating(obj):
+        return obj.calculate_rating()
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = UserSerializer(read_only=True)
+    rating = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Comment
+        fields = [
+            "id",
+            "project",
+            "message",
+            "author",
+            "creation_date",
+            "rating",
+        ]
+
+    @staticmethod
+    def get_rating(obj):
+        return obj.calculate_rating()

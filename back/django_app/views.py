@@ -1,9 +1,11 @@
 import datetime
 
 from django.contrib.auth.models import User
-from django.shortcuts import render
+from django.db.models import Case, Sum, When, IntegerField
+from django.shortcuts import render, get_object_or_404
 from rest_framework.decorators import permission_classes, api_view
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, logout
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -11,7 +13,26 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
 
 from django_app import models, serializers
-from django_app.utils import password_check, get_client_ip, update_rating, rate_item
+from django_app.utils import (
+    password_check,
+    get_client_ip,
+    update_rating,
+    rate_item,
+    get_item_rating,
+)
+
+
+def index(request):
+    return render(request, "index.html")
+
+
+@api_view(http_method_names=["GET", "POST"])
+@permission_classes([AllowAny])
+def api(request):
+    if request.method == "GET":
+        return Response(data={"message": "OK"})
+    elif request.method == "POST":
+        return Response(data={"message": request.data})
 
 
 @api_view(["POST"])
@@ -109,6 +130,16 @@ def update_user(request):
         return Response(serializer.errors, status=400)
 
 
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def user_logout(request):
+    try:
+        logout(request)
+        return Response(status=205)
+    except Exception as e:
+        return Response({"error": str(e)}, status=400)
+
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_user(request: Request) -> Response:
@@ -138,10 +169,35 @@ def create_project(request: Request) -> Response:
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def get_all_projects(request: Request) -> Response:
+def get_all_projects(request):
+    paginator = PageNumberPagination()
+    paginator.page_size = 9
     projects = models.Project.objects.all()
-    serializer = serializers.ProjectSerializer(projects, many=True)
-    return Response(serializer.data, status=200)
+
+    search_query = request.query_params.get("search", None)
+    if search_query:
+        projects = projects.filter(name__icontains=search_query)
+
+    sort_by = request.query_params.get("sort_by", None)
+    if sort_by == "name":
+        projects = projects.order_by("name")
+    elif sort_by == "ratings":
+        projects = projects.annotate(
+            rating_sum=Sum(
+                Case(
+                    When(ratings__is_liked=True, then=1),
+                    When(ratings__is_liked=False, then=-1),
+                    default=0,
+                    output_field=IntegerField(),
+                )
+            )
+        ).order_by("-rating_sum")
+    elif sort_by == "creation_date":
+        projects = projects.order_by("-creation_date")
+
+    result_page = paginator.paginate_queryset(projects, request)
+    serializer = serializers.ProjectSerializer(result_page, many=True)
+    return paginator.get_paginated_response(serializer.data)
 
 
 @api_view(["GET"])
@@ -191,6 +247,47 @@ def delete_project(request: Request, project_id: int) -> Response:
 
     project.delete()
     return Response({"detail": "Project deleted successfully."}, status=204)
+
+
+@api_view(["GET", "POST"])
+@permission_classes([IsAuthenticated])
+def comment_list_create(request, project_id):
+    project = get_object_or_404(models.Project, id=project_id)
+
+    if request.method == "GET":
+        comments = models.Comment.objects.filter(project=project)
+        serializer = serializers.CommentSerializer(comments, many=True)
+        return Response(serializer.data)
+
+    if request.method == "POST":
+        data = request.data.copy()
+        data["project"] = project.id
+        serializer = serializers.CommentSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save(author=request.user)
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
+
+
+@api_view(["GET", "PUT", "DELETE"])
+@permission_classes([IsAuthenticated])
+def comment_detail(request, comment_id):
+    comment = get_object_or_404(models.Comment, id=comment_id)
+
+    if request.method == "GET":
+        serializer = serializers.CommentSerializer(comment)
+        return Response(serializer.data)
+
+    if request.method == "PUT":
+        serializer = serializers.CommentSerializer(comment, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+
+    if request.method == "DELETE":
+        comment.delete()
+        return Response(status=204)
 
 
 @api_view(["POST"])

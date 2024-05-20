@@ -4,10 +4,10 @@
     <Dialog v-model:visible="visible" modal header="Вход" :style="{ width: '25rem' }">
       <TabView>
         <TabPanel header="Войти">
-          <LoginComponent/>
+          <LoginComponent :visible="visible"/>
         </TabPanel>
         <TabPanel header="Зарегистрироваться">
-          <RegisterComponent/>
+          <RegisterComponent :visible="visible"/>
         </TabPanel>
       </TabView>
     </Dialog>

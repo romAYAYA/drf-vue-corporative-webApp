@@ -1,18 +1,27 @@
-import {  useMutation, useQuery } from '@tanstack/vue-query'
+import { keepPreviousData, useMutation, useQuery } from '@tanstack/vue-query'
 import axios from 'axios'
 import { useToast } from 'primevue/usetoast'
-import { Ref, watch } from 'vue'
+import { computed, ComputedRef, Ref, watch } from 'vue'
 import { errorDetail, errorSummary } from '../utils/constants.ts'
 import { Project } from '../types/project.interface.ts'
+import { useUserStore } from '../stores/user.ts'
 
 
-export const useProjects = () => {
+export const useProjects = (isUserLoaded: ComputedRef<boolean>, projectsPage: Ref<number>, searchQuery: Ref<string>, sortCriteria: Ref<string>) => {
   const toast = useToast()
 
   const { data: projectsData, status: projectsDataStatus, refetch: projectsDataRefetch } = useQuery({
-    queryKey: ['projects'],
-    queryFn: async () => await axios.get('/projects'),
+    queryKey: ['projects', projectsPage, searchQuery.value, sortCriteria.value],
+    queryFn: async () => await axios.get('/projects/', {
+      params: {
+        page: projectsPage.value,
+        search: searchQuery.value,
+        sort_by: sortCriteria.value
+      }
+    }),
     select: ({ data }) => data,
+    enabled: isUserLoaded,
+    placeholderData: keepPreviousData,
     staleTime: Infinity
   })
 
@@ -27,17 +36,23 @@ export const useProjects = () => {
     }
   })
 
-  return { projectsData, projectsDataStatus, projectsDataRefetch }
+  const projectsCount = computed(() => projectsData?.value?.count)
+
+  return { projectsData, projectsDataStatus, projectsDataRefetch, projectsCount }
 }
 
 
 export const useProject = (projectId: number) => {
   const toast = useToast()
+  const userStore = useUserStore()
+
+  const isUserLoaded = computed(() => userStore.isUserLoaded)
 
   const { data: projectData, status: projectDataStatus } = useQuery({
     queryKey: ['project'],
-    queryFn: async () => await axios.get(`/projects/${ projectId }`),
-    select: ({ data }) => data
+    queryFn: async () => await axios.get(`/projects/${ projectId }/`),
+    select: ({ data }) => data,
+    enabled: isUserLoaded
   })
 
   watch(projectDataStatus, (newVal) => {
@@ -101,24 +116,3 @@ export const handleCreateProject = (projectData: Ref<Project>, file: Ref<File | 
 
   return { createProject }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

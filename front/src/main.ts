@@ -23,7 +23,8 @@ import TabPanel from 'primevue/tabpanel'
 import Toolbar from 'primevue/toolbar'
 import Textarea from 'primevue/textarea'
 import FileUpload from 'primevue/fileupload'
-
+import Paginator from 'primevue/paginator'
+import Card from 'primevue/card'
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -41,6 +42,8 @@ app.component('TabPanel', TabPanel)
 app.component('Toolbar', Toolbar)
 app.component('Textarea', Textarea)
 app.component('FileUpload', FileUpload)
+app.component('Paginator', Paginator)
+app.component('Card', Card)
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL
 

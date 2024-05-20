@@ -8,6 +8,8 @@ from rest_framework_simplejwt.views import (
 from django_app import views
 
 urlpatterns = [
+    path("", views.index),
+    path("api/", views.api),
     # tokens
     path("api/token/refresh", TokenRefreshView.as_view(), name="token_refresh"),
     # auth
@@ -16,6 +18,7 @@ urlpatterns = [
     path("api/users", views.get_users, name="get_users"),
     path("api/users/me", views.get_user, name="get_user"),
     path("api/users/update", views.update_user, name="update_user"),
+    path("api/users/logout", views.user_logout, name="user_logout"),
     # projects
     path("api/projects/", views.get_all_projects, name="get_all_projects"),
     path(
@@ -32,11 +35,20 @@ urlpatterns = [
         views.delete_project,
         name="delete_project",
     ),
+    # comments
+    path("api/comments/", views.comment_list_create, name="comment_list_create-create"),
+    path(
+        "api/comments/<int:project_id>/",
+        views.comment_list_create,
+        name="comment_list_create_by_project",
+    ),
+    path("api/comment/<int:comment_id>/", views.comment_detail, name="comment_detail"),
+    # ratings
+    path(
+        "api/projects/rating/<int:project_id>", views.rate_project, name="rate_project"
+    ),
     #
     path(
-        "api/projects/rating/<int:project_id>/", views.rate_project, name="rate_project"
-    ),
-    path(
-        "api/comments/rating/<int:comment_id>/", views.rate_comment, name="rate_comment"
+        "api/comments/rating/<int:comment_id>", views.rate_comment, name="rate_comment"
     ),
 ]

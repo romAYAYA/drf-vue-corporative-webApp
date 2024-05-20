@@ -1,6 +1,7 @@
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models import Sum, Case, When, IntegerField
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.utils import timezone
@@ -57,6 +58,19 @@ class Project(models.Model):
         null=True,
     )
 
+    def calculate_rating(self):
+        total_ratings = self.ratings.aggregate(
+            rating_sum=Sum(
+                Case(
+                    When(is_liked=True, then=1),
+                    When(is_liked=False, then=-1),
+                    default=0,
+                    output_field=IntegerField(),
+                )
+            )
+        )["rating_sum"]
+        return total_ratings if total_ratings is not None else 0
+
     def __str__(self):
         return self.name
 
@@ -73,8 +87,18 @@ class Comment(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     creation_date = models.DateTimeField(default=timezone.now)
 
-    def __str__(self):
-        return f"Comment by {self.author} on {self.project}"
+    def calculate_rating(self):
+        total_ratings = self.ratings.aggregate(
+            rating_sum=Sum(
+                Case(
+                    When(is_liked=True, then=1),
+                    When(is_liked=False, then=-1),
+                    default=0,
+                    output_field=IntegerField(),
+                )
+            )
+        )["rating_sum"]
+        return total_ratings if total_ratings is not None else 0
 
     class Meta:
         verbose_name = "Comment"
